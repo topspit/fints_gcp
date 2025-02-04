@@ -1,0 +1,17 @@
+# richtiges Projekt in Google Cloud auswählen. fints-web durch den richtigen Projektnamen abändern
+gcloud config set project fints-web
+
+# fint-web muss mit projektname ersetzt werden
+# befehlt baut das Dockerimage
+gcloud builds submit --tag gcr.io/fints-web/fints-app
+
+# fints-web@gmail.com muss durch den aktuellen User ersetzt werden unter welchem man den Befehl ausführt.
+# fints-web muss durch das richtigen Projektnamen ersetzt werden
+gcloud projects add-iam-policy-binding fints-web     --member=user:fints-web@gmail.com     --role=roles/cloudbuild.builds.editor
+
+# befehl startet ein google WebService mit dem zuvor gebauten Image. Wieder auf den Projektnamen achten!!!
+gcloud run deploy fints-app     --image gcr.io/fints-web/fints-app     --platform managed     --region europe-west3     --allow-unauthenticated
+
+# befehl löscht den WebService
+gcloud run services delete fints-app --region europe-west3
+
