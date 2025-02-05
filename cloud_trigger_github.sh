@@ -1,0 +1,1 @@
+gcloud beta builds triggers create github --name="fins-dev-trigger" --repo-owner="topspit" --repo-name="fints_gcp" --branch-pattern="fints-dev" --build-config="/home/familieehrler22/gitprojekte/fints_gcp/cloudbuild-dev.yaml"
