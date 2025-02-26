@@ -6,6 +6,13 @@ steps:
     args: ['push', 'gcr.io/$PROJECT_ID/fints-app:$BUILD_ID']
   - name: 'gcr.io/cloud-builders/gcloud'
     args: ['run', 'deploy', 'fints-dev', '--image', 'gcr.io/$PROJECT_ID/fints-app:$BUILD_ID', '--region', 'europe-west3', '--allow-unauthenticated']
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args: [
+      'run', 'services', 'add-iam-policy-binding', 'fints-dev',
+      '--member=allUsers',
+      '--role=roles/run.invoker',
+      '--region=europe-west3'
+    ]
 
 options:
   logging: CLOUD_LOGGING_ONLY
