@@ -11,9 +11,9 @@ steps:
       '--region', 'europe-west3',
       '--allow-unauthenticated',
       '--update-secrets', 
-      'DECRYPTION_PASSWORD=DECRYPTION_PASSWORD/versions:latest',
+      'DECRYPTION_PASSWORD=DECRYPTION_PASSWORD:latest',
       '--update-secrets',
-      'FIRESTORE_ENCRYPTION_KEY=FIRESTORE_ENCRYPTION_KEY/versions:latest'
+      'FIRESTORE_ENCRYPTION_KEY=FIRESTORE_ENCRYPTION_KEY:latest'
     ]
   - name: 'gcr.io/cloud-builders/gcloud'
     args: [
