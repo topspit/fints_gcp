@@ -6,7 +6,7 @@ steps:
     args: ['push', 'gcr.io/$PROJECT_ID/fints-app:$BUILD_ID']
   - name: 'gcr.io/cloud-builders/gcloud'
     args: ['run', 'deploy', 'fints-dev', '--image', 'gcr.io/$PROJECT_ID/fints-app:$BUILD_ID', '--region', 'europe-west3', '--allow-unauthenticated',
-      '--update-secrets', 'DECRYPTION_PASSWORD=projects/$PROJECT_ID/secrets/DECRYPTION_PASSWORD/versions/1', 'FIRESTORE_ENCRYPTION_KEY=projects/$PROJECT_ID/secrets/FIRESTORE_ENCRYPTION_KEY/versions/1']
+      '--update-secrets', 'DECRYPTION_PASSWORD=DECRYPTION_PASSWORD/versions/latest', 'FIRESTORE_ENCRYPTION_KEY=FIRESTORE_ENCRYPTION_KEY/versions/latest']
   - name: 'gcr.io/cloud-builders/gcloud'
     args: [
       'run', 'deploy', 'fints-dev',
