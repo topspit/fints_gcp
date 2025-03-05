@@ -5,18 +5,22 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'gcr.io/$PROJECT_ID/fints-app:$BUILD_ID']
   - name: 'gcr.io/cloud-builders/gcloud'
-    args: ['run', 'deploy', 'fints-dev', '--image', 'gcr.io/$PROJECT_ID/fints-app:$BUILD_ID', '--region', 'europe-west3', '--allow-unauthenticated',
-      '--update-secrets', 'DECRYPTION_PASSWORD=DECRYPTION_PASSWORD/versions/latest', 'FIRESTORE_ENCRYPTION_KEY=FIRESTORE_ENCRYPTION_KEY/versions/latest']
-  - name: 'gcr.io/cloud-builders/gcloud'
     args: [
       'run', 'deploy', 'fints-dev',
       '--image', 'gcr.io/$PROJECT_ID/fints-app:$BUILD_ID',
       '--region', 'europe-west3',
       '--allow-unauthenticated',
       '--update-secrets', 
-      'DECRYPTION_PASSWORD=DECRYPTION_PASSWORD:latest',
+      'DECRYPTION_PASSWORD=DECRYPTION_PASSWORD/versions:latest',
       '--update-secrets',
-      'FIRESTORE_ENCRYPTION_KEY=FIRESTORE_ENCRYPTION_KEY:latest'
+      'FIRESTORE_ENCRYPTION_KEY=FIRESTORE_ENCRYPTION_KEY/versions:latest'
+    ]
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args: [
+      'run', 'services', 'add-iam-policy-binding', 'fints-dev',
+      '--member=allUsers',
+      '--role=roles/run.invoker',
+      '--region=europe-west3'
     ]
 
 options:
