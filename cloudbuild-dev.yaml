@@ -5,7 +5,8 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'gcr.io/$PROJECT_ID/fints-app:$BUILD_ID']
   - name: 'gcr.io/cloud-builders/gcloud'
-    args: ['run', 'deploy', 'fints-dev', '--image', 'gcr.io/$PROJECT_ID/fints-app:$BUILD_ID', '--region', 'europe-west3', '--allow-unauthenticated']
+    args: ['run', 'deploy', 'fints-dev', '--image', 'gcr.io/$PROJECT_ID/fints-app:$BUILD_ID', '--region', 'europe-west3', '--allow-unauthenticated',
+      '--update-env-vars', 'DECRYPTION_PASSWORD=projects/$PROJECT_ID/secrets/DECRYPTION_PASSWORD/versions/1', 'FIRESTORE_ENCRYPTION_KEY=projects/$PROJECT_ID/secrets/FIRESTORE_ENCRYPTION_KEY/versions/1']
   - name: 'gcr.io/cloud-builders/gcloud'
     args: [
       'run', 'services', 'add-iam-policy-binding', 'fints-dev',
