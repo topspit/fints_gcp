@@ -8,3 +8,4 @@ cachecontrol
 fints
 firebase-admin
 pycryptodome
+gunicorn
