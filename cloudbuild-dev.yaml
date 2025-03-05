@@ -14,8 +14,9 @@ steps:
       '--region', 'europe-west3',
       '--allow-unauthenticated',
       '--update-secrets', 
-      'DECRYPTION_PASSWORD=projects/$PROJECT_ID/secrets/DECRYPTION_PASSWORD/versions/1',
-      'FIRESTORE_ENCRYPTION_KEY=projects/$PROJECT_ID/secrets/FIRESTORE_ENCRYPTION_KEY/versions/1'
+      'DECRYPTION_PASSWORD=DECRYPTION_PASSWORD:latest',
+      '--update-secrets',
+      'FIRESTORE_ENCRYPTION_KEY=FIRESTORE_ENCRYPTION_KEY:latest'
     ]
 
 options:
