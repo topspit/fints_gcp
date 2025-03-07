@@ -1,4 +1,4 @@
- FinTS Web App auf Google Cloud
+ # FinTS Web App auf Google Cloud
 
 Dieses Projekt bietet eine vollständige Implementierung einer FinTS-gestützten Webanwendung, die in der Google Cloud läuft. Es beinhaltet eine Flask-Webanwendung zur Authentifizierung über Google OAuth, zur Speicherung von Benutzerdaten in Firestore sowie zur Abfrage von Bankkontodaten über das FinTS-Protokoll.
 
