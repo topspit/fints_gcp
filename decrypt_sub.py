@@ -19,7 +19,5 @@ def decrypt_file(encrypted_file, decrypted_file, password):
         subprocess.run(command, check=True)
         print(f"Die Datei wurde erfolgreich entschlüsselt und in {decrypted_file} gespeichert.")
     except subprocess.CalledProcessError as e:
-        print(f"Fehler beim Entschlüsseln der Datei: {e}")
-
-# Beispielaufruf der Funktion
+        print(f"Fehler beim Entschlüsseln der Datei:")
 
