@@ -1,18 +1,21 @@
-# FinTS Google Cloud Demo
+ FinTS Web App auf Google Cloud
 
-## Einleitung
-Dieses Projekt zeigt, wie man Google Cloud Technologien mit FinTS (Financial Transaction Services) kombiniert, um ein sicheres und cloudbasiertes Online-Banking-Dashboard zu erstellen.
+Dieses Projekt bietet eine vollständige Implementierung einer FinTS-gestützten Webanwendung, die in der Google Cloud läuft. Es beinhaltet eine Flask-Webanwendung zur Authentifizierung über Google OAuth, zur Speicherung von Benutzerdaten in Firestore sowie zur Abfrage von Bankkontodaten über das FinTS-Protokoll.
 
-Nach dem Durchlaufen dieses Projekts wirst du gelernt haben:
-- Wie man Google OAuth für die Authentifizierung nutzt.
-- Wie man eine verschlüsselte API-Anbindung mit FinTS implementiert.
-- Wie man Firebase Firestore als Datenbank für Nutzeranmeldungen nutzt.
-- Wie man eine Webanwendung mit Flask in einer Google Cloud Umgebung bereitstellt.
-
-Das Ziel ist es, eine funktionale Webanwendung zu erstellen, die sich mit einem Bankkonto verbindet, Authentifizierungsmechanismen nutzt und Daten sicher in der Cloud speichert.
+## Lernziele
+Durch das Durcharbeiten dieses Projekts lernen Sie:
+- **Google OAuth 2.0**: Wie man eine sichere Anmeldung mit Google realisiert.
+- **Google Firestore**: Speicherung und Verwaltung von Nutzerdaten in einer NoSQL-Datenbank.
+- **FinTS-Integration**: Abrufen von Bankkontodaten über das FinTS-Protokoll.
+- **Google Cloud Run**: Deployment einer containerisierten Anwendung in der Google Cloud.
+- **Terraform**: Automatisierte Bereitstellung der Cloud-Infrastruktur.
+- **Google Cloud Build Trigger**: Automatisierung des Build- und Deployment-Prozesses.
 
 ## Projektübersicht
-Diese Anwendung ermöglicht es Nutzern, sich mit ihrem Google-Konto anzumelden, ihre Bankdaten über das FinTS-Protokoll zu verbinden und ihren Kontostand über eine Web-Oberfläche anzuzeigen.
+Das Projekt besteht aus mehreren Komponenten:
+- **Flask-Webanwendung (`app.py`)**: Kern der Anwendung mit Authentifizierung, Firestore-Datenbankzugriff und FinTS-Abfragen.
+- **Terraform-Konfigurationsdateien (`main.tf`, `service-account.tf`)**: Automatisierte Bereitstellung der Firestore-Datenbank und der benötigten Google Cloud Ressourcen.
+- **Cloud Build-Konfiguration (`cloudbuild-dev.yaml`)**: Automatisiertes Deployment auf Google Cloud Run mit Google Cloud Build.
 
 ### Hauptfunktionen
 - **Google OAuth 2.0 Authentifizierung**: Nutzer melden sich mit ihrem Google-Konto an.
@@ -49,53 +52,57 @@ Ein Formular für Nutzer, um ihre Bankdaten einzugeben und mit FinTS zu verbinde
 ### 7. `templates/tan.html`
 Falls eine TAN erforderlich ist, wird diese Seite zur Eingabe einer TAN verwendet.
 
-## Einrichtung und Nutzung
-
+## Installation und Einrichtung
 ### Voraussetzungen
-- Ein Google Cloud Projekt mit OAuth 2.0 Credentials
-- Ein Firebase Firestore Projekt
-- Eine Bank, die FinTS unterstützt
-- Python 3 und Flask
+- Ein Google Cloud-Projekt mit aktivierten APIs:
+  - Cloud Run
+  - Firestore
+  - IAM
+- Ein Service-Account mit den entsprechenden Berechtigungen.
+- Terraform installiert.
+- Docker installiert.
 
-### Installation
-1. Klone dieses Repository:
+### Schritte zur Einrichtung
+1. **Google Cloud Authentifizierung einrichten**
    ```sh
-   git clone https://github.com/dein-username/dein-repository.git
-   cd dein-repository
+   gcloud auth login
+   gcloud config set project fints-web
+   ```
+2. **Terraform ausführen** (erstellt Firestore und Service-Accounts):
+   ```sh
+   terraform init
+   terraform apply
+   ```
+3. **Docker-Image erstellen und in Google Container Registry hochladen:**
+   ```sh
+   docker build -t gcr.io/fints-web/fints-app:latest .
+   docker push gcr.io/fints-web/fints-app:latest
+   ```
+4. **Cloud Run Deployment starten:**
+   ```sh
+   gcloud run deploy fints-dev --image gcr.io/fints-web/fints-app:latest --region europe-west3 --allow-unauthenticated
    ```
 
-2. Installiere die benötigten Abhängigkeiten:
-   ```sh
-   pip install -r requirements.txt
-   ```
+### Automatisches Deployment mit Cloud Build
+Google Cloud Build kann automatisch Änderungen aus GitHub übernehmen und die Anwendung neu deployen. Der `cloudbuild-dev.yaml` definiert diesen Prozess.
 
-3. Setze die Umgebungsvariablen für die Entschlüsselung:
-   ```sh
-   export DECRYPTION_PASSWORD='dein_passwort'
-   ```
+**Trigger erstellen:**
+```sh
+gcloud beta builds triggers create cloud-source-repositories \
+  --repo=fints-web \
+  --branch-pattern=".*" \
+  --build-config=cloudbuild-dev.yaml
+```
 
-4. Starte die Anwendung:
-   ```sh
-   python app.py
-   ```
+Nach dem Einrichten wird bei jedem Push in das Repository automatisch ein neuer Build und ein Deployment ausgelöst.
 
-5. Öffne die Anwendung im Browser unter `http://localhost:5000`
+## Fazit
+Dieses Projekt bietet eine praxisnahe Einführung in die Kombination von Google Cloud Technologien mit Python-basierten Webanwendungen. Es automatisiert die Infrastrukturbereitstellung mit Terraform und nutzt Google Cloud Build für Continuous Deployment.
 
-## Deployment auf Google Cloud
-Das Projekt kann in einer Google Cloud Umgebung bereitgestellt werden. Hierfür kannst du Google Cloud Run oder eine VM auf Google Compute Engine nutzen.
-
-### Deployment mit Cloud Run
-1. Erstelle ein Dockerfile für die Anwendung.
-2. Baue das Docker-Image und pushe es in die Google Container Registry.
-3. Starte das Deployment mit Cloud Run.
-
-Weitere Details findest du in der Google Cloud Dokumentation.
+Viel Erfolg beim Ausprobieren! 🚀
 
 ## Sicherheitshinweise
 - Speichere keine sensiblen Daten im Quellcode.
 - Verwende Umgebungsvariablen für Passwörter und API-Keys.
 - Stelle sicher, dass Firestore-Datenbankregeln korrekt konfiguriert sind.
-
-## Fazit
-Diese Anwendung ist eine gute Einführung für Google Cloud Nutzer, die lernen möchten, wie man eine sichere Webanwendung mit Google OAuth, Firebase Firestore und FinTS erstellt. Viel Erfolg beim Ausprobieren!
 
