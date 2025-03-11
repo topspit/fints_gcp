@@ -13,7 +13,7 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 from decrypt_enc_PIN import decrypt_pin, encrypt_pin
 from google.oauth2 import service_account
-import logging
+#import logging
 
 
 app = Flask(__name__)
@@ -40,8 +40,7 @@ decrypt_file(encrypted_file_firestone, decrypted_file_firestone, password_firest
 #file_firestone_secret_manager="/secrets/SERVICE_ACCOUNT_KEY"
 file_firestone_secret_manager = "/secrets/SERVICE_ACCOUNT_KEY"
 # Lade die Service-Account-Daten
-logging.info("Dies ist eine Info-Nachricht.")
-logging.info(os.getenv('SERVICE_ACCOUNT_KEY'))
+print(f"Gebe env SERVICE_ACCOUNT_KEY aus OS aus: {os.getenv('SERVICE_ACCOUNT_KEY')} gespeichert.")
 cred = service_account.Credentials.from_service_account_file(file_firestone_secret_manager)
 
 # Firebase-App initialisieren
