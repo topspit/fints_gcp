@@ -38,11 +38,20 @@ password_firestone = os.getenv('DECRYPTION_PASSWORD')
 decrypt_file(encrypted_file_firestone, decrypted_file_firestone, password_firestone)
 # Lade service account daten aus secret unter /secrets/ (Google Secret Manager)
 #file_firestone_secret_manager="/secrets/SERVICE_ACCOUNT_KEY"
-file_firestone_secret_manager = "/secrets/SERVICE_ACCOUNT_KEY"
+#file_firestone_secret_manager = "/secrets/SERVICE_ACCOUNT_KEY"
 # Lade die Service-Account-Daten
-print(f"Gebe env SERVICE_ACCOUNT_KEY aus OS aus: {os.getenv('SERVICE_ACCOUNT_KEY')} gespeichert.")
-cred = service_account.Credentials.from_service_account_file(file_firestone_secret_manager)
-
+#print(f"Gebe env SERVICE_ACCOUNT_KEY aus OS aus: {os.getenv('SERVICE_ACCOUNT_KEY')} gespeichert.")
+service_account_json = os.getenv('SERVICE_ACCOUNT_KEY')
+# 2. JSON-Daten in eine Datei schreiben
+with open('/tmp/service-account.json', 'w') as f:
+    f.write(service_account_json)
+cred = credentials.Certificate("/tmp/service-account.json")
+# Löschen der service account json firestone Datei nach erfolgreichem Einlesen
+if os.path.exists("/tmp/service-account.json"):
+    os.remove("/tmp/service-account.json")
+    print(f"/tmp/service-account.json wurde erfolgreich gelöscht.")
+else:
+    print(f"{decrypted_file_firestone} existiert nicht.")
 # Firebase-App initialisieren
 firebase_admin.initialize_app(cred)
 # Löschen der service account json firestone Datei nach erfolgreichem Einlesen
