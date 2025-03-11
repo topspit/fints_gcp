@@ -13,8 +13,12 @@ steps:
       '--update-secrets', 
       'DECRYPTION_PASSWORD=DECRYPTION_PASSWORD:latest',
       '--update-secrets',
-      'FIRESTORE_ENCRYPTION_KEY=FIRESTORE_ENCRYPTION_KEY:latest'
+      'FIRESTORE_ENCRYPTION_KEY=FIRESTORE_ENCRYPTION_KEY:latest',
+      '--update-secrets',
+      'SERVICE_ACCOUNT_KEY=service-account-key:latest'
     ]
+
+    
   - name: 'gcr.io/cloud-builders/gcloud'
     args: [
       'run', 'services', 'add-iam-policy-binding', 'fints-dev',
