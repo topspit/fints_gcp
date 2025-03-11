@@ -2,7 +2,7 @@ from Crypto.Cipher import AES
 import base64
 import os
 
-SECRET_KEY = os.getenv("FIRESTORE_ENCRYPTION_KEY")  # Muss 32 Byte lang sein
+SECRET_KEY = os.getenv("DECRYPTION_PASSWORD")  # Muss 32 Byte lang sein
 # Auffüllen mit 'a' bis 32 Bytes, aber auch Abschneiden, falls der Key länger ist
 SECRET_KEY = SECRET_KEY.ljust(32, 'a')[:32]
 
