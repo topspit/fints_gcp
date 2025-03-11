@@ -15,9 +15,9 @@ steps:
       '--update-secrets',
       'FIRESTORE_ENCRYPTION_KEY=FIRESTORE_ENCRYPTION_KEY:latest',
       '--update-secrets',
-      '/secrets/SERVICE_ACCOUNT_KEY=service-account-key:latest',
+      '/secrets/SERVICE_ACCOUNT_KEY/KEY=service-account-key:latest',
       '--update-secrets',
-      '/secrets/OAUTH_CLIENT_SECRET=oauth-client-secret:latest'
+      '/secrets/OAUTH_CLIENT_SECRET/SECRET=oauth-client-secret:latest'
     ]
     
   - name: 'gcr.io/cloud-builders/gcloud'
