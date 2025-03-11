@@ -15,7 +15,7 @@ steps:
       '--update-secrets',
       'FIRESTORE_ENCRYPTION_KEY=FIRESTORE_ENCRYPTION_KEY:latest',
       '--update-secrets',
-      'SERVICE_ACCOUNT_KEY=service-account-key:latest'
+      '/secrets/SERVICE_ACCOUNT_KEY=service-account-key:latest'
     ]
 
     
