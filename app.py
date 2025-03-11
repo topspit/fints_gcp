@@ -34,8 +34,10 @@ encrypted_file_firestone = "service-account.json.enc"
 decrypted_file_firestone = "service-account.json"
 password_firestone = os.getenv('DECRYPTION_PASSWORD')
 decrypt_file(encrypted_file_firestone, decrypted_file_firestone, password_firestone)
+# Lade service account daten aus secret unter /secrets/ (Google Secret Manager)
+file_firestone_secret_manager="/secrets/SERVICE_ACCOUNT_KEY"
 # Lade die Service-Account-Daten
-cred = credentials.Certificate(decrypted_file_firestone)
+cred = credentials.Certificate(file_firestone_secret_manager)
 
 # Firebase-App initialisieren
 firebase_admin.initialize_app(cred)
