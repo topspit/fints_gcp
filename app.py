@@ -12,6 +12,7 @@ from fints.client import FinTS3PinTanClient, NeedTANResponse
 import firebase_admin
 from firebase_admin import credentials, firestore
 from decrypt_enc_PIN import decrypt_pin, encrypt_pin
+from google.oauth2 import service_account
 
 
 app = Flask(__name__)
@@ -35,9 +36,10 @@ decrypted_file_firestone = "service-account.json"
 password_firestone = os.getenv('DECRYPTION_PASSWORD')
 decrypt_file(encrypted_file_firestone, decrypted_file_firestone, password_firestone)
 # Lade service account daten aus secret unter /secrets/ (Google Secret Manager)
-file_firestone_secret_manager="/secrets/SERVICE_ACCOUNT_KEY"
+#file_firestone_secret_manager="/secrets/SERVICE_ACCOUNT_KEY"
+file_firestone_secret_manager = "/secrets/SERVICE_ACCOUNT_KEY"
 # Lade die Service-Account-Daten
-cred = credentials.Certificate(file_firestone_secret_manager)
+cred = service_account.Credentials.from_service_account_file(file_firestone_secret_manager)
 
 # Firebase-App initialisieren
 firebase_admin.initialize_app(cred)
