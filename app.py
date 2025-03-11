@@ -23,19 +23,20 @@ os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # Lokale HTTP-Entwicklung erlau
 
 
 # Entschlüsselung der Client Secret Datei für Google OAuth direkt beim Start der Anwendung
-encrypted_file = "client_secret.json.enc"
-decrypted_file = "client_secret.json"
-password = os.getenv('DECRYPTION_PASSWORD')
-decrypt_file(encrypted_file, decrypted_file, password)
+#encrypted_file = "client_secret.json.enc"
+#decrypted_file = "client_secret.json"
+#password = os.getenv('DECRYPTION_PASSWORD')
+#decrypt_file(encrypted_file, decrypted_file, password)
 
 # Google OAuth Konfiguration
-client_secrets_file = os.path.join(pathlib.Path(__file__).parent, decrypted_file)
+#client_secrets_file = os.path.join(pathlib.Path(__file__).parent, decrypted_file)
+client_secrets_file = os.path.join(pathlib.Path(__file__).parent, "/secrets/OAUTH_CLIENT_SECRET")
 
 # Entschlüsselung der Client Secret Datei für Google OAuth direkt beim Start der Anwendung
-encrypted_file_firestone = "service-account.json.enc"
-decrypted_file_firestone = "service-account.json"
-password_firestone = os.getenv('DECRYPTION_PASSWORD')
-decrypt_file(encrypted_file_firestone, decrypted_file_firestone, password_firestone)
+#encrypted_file_firestone = "service-account.json.enc"
+#decrypted_file_firestone = "service-account.json"
+#password_firestone = os.getenv('DECRYPTION_PASSWORD')
+#decrypt_file(encrypted_file_firestone, decrypted_file_firestone, password_firestone)
 # Lade service account daten aus secret unter /secrets/ (Google Secret Manager)
 
 file_firestone_secret_manager = "/secrets/SERVICE_ACCOUNT_KEY"
@@ -47,19 +48,19 @@ file_firestone_secret_manager = "/secrets/SERVICE_ACCOUNT_KEY"
 #    f.write(service_account_json)
 cred = credentials.Certificate(file_firestone_secret_manager)
 # Löschen der service account json firestone Datei nach erfolgreichem Einlesen
-if os.path.exists("/tmp/service-account.json"):
-    os.remove("/tmp/service-account.json")
-    print(f"/tmp/service-account.json wurde erfolgreich gelöscht.")
-else:
-    print(f"{decrypted_file_firestone} existiert nicht.")
+#if os.path.exists("/tmp/service-account.json"):
+#    os.remove("/tmp/service-account.json")
+ #   print(f"/tmp/service-account.json wurde erfolgreich gelöscht.")
+#else:
+#    print(f"{decrypted_file_firestone} existiert nicht.")
 # Firebase-App initialisieren
 firebase_admin.initialize_app(cred)
 # Löschen der service account json firestone Datei nach erfolgreichem Einlesen
-if os.path.exists(decrypted_file_firestone):
-    os.remove(decrypted_file_firestone)
-    print(f"{decrypted_file_firestone} wurde erfolgreich gelöscht.")
-else:
-    print(f"{decrypted_file_firestone} existiert nicht.")
+#if os.path.exists(decrypted_file_firestone):
+#    os.remove(decrypted_file_firestone)
+#    print(f"{decrypted_file_firestone} wurde erfolgreich gelöscht.")
+#else:
+#    print(f"{decrypted_file_firestone} existiert nicht.")
 # Firestore-Client erstellen
 db = firestore.client()
 
