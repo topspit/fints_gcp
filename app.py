@@ -7,7 +7,6 @@ from google_auth_oauthlib.flow import Flow
 from pip._vendor import cachecontrol
 import google.auth.transport.requests
 from functools import wraps
-#from decrypt_sub import decrypt_file
 from fints.client import FinTS3PinTanClient, NeedTANResponse
 import firebase_admin
 from firebase_admin import credentials, firestore
@@ -22,45 +21,17 @@ app.secret_key = os.urandom(24)  # Geheime Session-Key
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # Lokale HTTP-Entwicklung erlauben
 
 
-# Entschlüsselung der Client Secret Datei für Google OAuth direkt beim Start der Anwendung
-#encrypted_file = "client_secret.json.enc"
-#decrypted_file = "client_secret.json"
-#password = os.getenv('DECRYPTION_PASSWORD')
-#decrypt_file(encrypted_file, decrypted_file, password)
 
-# Google OAuth Konfiguration
-#client_secrets_file = os.path.join(pathlib.Path(__file__).parent, decrypted_file)
 client_secrets_file = os.path.join(pathlib.Path(__file__).parent, "/secrets/OAUTH_CLIENT_SECRET/SECRET")
 
-# Entschlüsselung der Client Secret Datei für Google OAuth direkt beim Start der Anwendung
-#encrypted_file_firestone = "service-account.json.enc"
-#decrypted_file_firestone = "service-account.json"
-#password_firestone = os.getenv('DECRYPTION_PASSWORD')
-#decrypt_file(encrypted_file_firestone, decrypted_file_firestone, password_firestone)
-# Lade service account daten aus secret unter /secrets/ (Google Secret Manager)
 
 file_firestone_secret_manager = "/secrets/SERVICE_ACCOUNT_KEY/KEY"
-# Lade die Service-Account-Daten
-#print(f"Gebe env SERVICE_ACCOUNT_KEY aus OS aus: {os.getenv('SERVICE_ACCOUNT_KEY')} gespeichert.")
-#service_account_json = os.getenv('SERVICE_ACCOUNT_KEY')
-# 2. JSON-Daten in eine Datei schreiben
-#with open('/tmp/service-account.json', 'w') as f:
-#    f.write(service_account_json)
+
 cred = credentials.Certificate(file_firestone_secret_manager)
-# Löschen der service account json firestone Datei nach erfolgreichem Einlesen
-#if os.path.exists("/tmp/service-account.json"):
-#    os.remove("/tmp/service-account.json")
- #   print(f"/tmp/service-account.json wurde erfolgreich gelöscht.")
-#else:
-#    print(f"{decrypted_file_firestone} existiert nicht.")
+
 # Firebase-App initialisieren
 firebase_admin.initialize_app(cred)
-# Löschen der service account json firestone Datei nach erfolgreichem Einlesen
-#if os.path.exists(decrypted_file_firestone):
-#    os.remove(decrypted_file_firestone)
-#    print(f"{decrypted_file_firestone} wurde erfolgreich gelöscht.")
-#else:
-#    print(f"{decrypted_file_firestone} existiert nicht.")
+
 # Firestore-Client erstellen
 db = firestore.client()
 
@@ -75,12 +46,7 @@ flow = Flow.from_client_secrets_file(
     redirect_uri="https://fints-dev-2758660863.europe-west3.run.app/login/callback"
 )
 
-# Löschen der Datei nach erfolgreichem Einlesen
-#if os.path.exists(decrypted_file):
-#    os.remove(decrypted_file)
-#    print(f"{decrypted_file} wurde erfolgreich gelöscht.")
-#else:
-#    print(f"{decrypted_file} existiert nicht.")
+
 
 # Login-Required Decorator
 def login_required(f):
@@ -91,8 +57,6 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-# Simulierter Google Key Store (später durch echten ersetzen)
-mock_google_key_store = {}
 
 @app.route("/")
 def index():
@@ -138,8 +102,7 @@ def logout():
     session.clear()
     return redirect("/")
 
-# Simulierter Google Key Store (nur für den Test)
-mock_google_key_store = {}
+
 
 @app.route("/dashboard")
 @login_required
