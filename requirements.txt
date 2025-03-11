@@ -9,4 +9,3 @@ fints
 firebase-admin
 pycryptodome
 gunicorn
-logging
