@@ -199,24 +199,33 @@ def fints_login():
 @app.route("/transactions", methods=["POST"])
 @login_required
 def get_transactions():
-    if "email" not in session:
+    email = session.get("email")
+    if not email:
         return redirect("/")
-
     selected_days = int(request.form["days"])
     start_date = datetime.today() - timedelta(days=selected_days)
 
-    # Authentifizierungsdaten aus Firestore abrufen (angepasst für deine DB-Struktur)
-    user_data = db.collection("knownUsers").document(session["email"]).get().to_dict()
-    if not user_data:
-        return "Keine Daten gefunden", 400
+    
+    user_ref = db.collection("known_users").document(email)
+    user_doc = user_ref.get()
 
-    f = FinTS3PinTanClient(
-        bank_identifier=user_data["bank_identifier"],
-        user_id=user_data["user_id"],
-        pin=decrypt_pin(user_data["pin"]),
-        server=user_data["server"],
-        product_id=product_id
-    )
+    
+    if user_doc.exists:
+        # Falls der Nutzer existiert, die gespeicherten Daten abrufen
+        user_data = user_doc.to_dict()
+        bank_identifier = user_data["bank_identifier"]
+        user_id = user_data["user_id"]
+        pin = decrypt_pin(user_data["pin"])
+        server = user_data["server"]
+
+        # FINTS Login durchführen
+        f = FinTS3PinTanClient(
+            bank_identifier=bank_identifier,
+            user_id=user_id,
+            pin=pin,
+            server=server,
+            product_id=product_id
+        )
 
     with f:
         accounts = f.get_sepa_accounts()
