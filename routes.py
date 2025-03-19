@@ -2,6 +2,7 @@
 from flask import render_template, session, request, redirect
 from auth import login, callback, logout
 from database import get_user, save_user
+from decrypt_enc_PIN import encrypt_pin
 def configure_routes(app):
     @app.route("/")
     def index():
