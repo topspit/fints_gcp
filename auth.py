@@ -8,7 +8,7 @@ from google_auth_oauthlib.flow import Flow
 from pip._vendor import cachecontrol
 import google.auth.transport.requests
 
-oauth_secrets_file = os.path.join(pathlib.Path(__file__).parent, "secrets/OAUTH_CLIENT_SECRET/SECRET")
+oauth_secrets_file = os.path.join(pathlib.Path(__file__).parent, "/secrets/OAUTH_CLIENT_SECRET/SECRET")
 flow = Flow.from_client_secrets_file(
     client_secrets_file=oauth_secrets_file,
     scopes=["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email", "openid"],
