@@ -2,7 +2,7 @@
 import firebase_admin
 from firebase_admin import credentials, firestore
 
-file_firestone_secret_manager = "secrets/SERVICE_ACCOUNT_KEY/KEY"
+file_firestone_secret_manager = "/secrets/SERVICE_ACCOUNT_KEY/KEY"
 cred = credentials.Certificate(file_firestone_secret_manager)
 firebase_admin.initialize_app(cred)
 db = firestore.client()
