@@ -12,6 +12,7 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 from decrypt_enc_PIN import decrypt_pin, encrypt_pin
 from google.oauth2 import service_account
+from datetime import datetime, timedelta
 #import logging
 
 
@@ -113,7 +114,7 @@ def dashboard():
     user_ref = db.collection("known_users").document(email)
     user_doc = user_ref.get()
 
-    # Simulierte Abfrage im Google Key Store
+    
     if user_doc.exists:
         # Falls der Nutzer existiert, die gespeicherten Daten abrufen
         user_data = user_doc.to_dict()
@@ -153,7 +154,7 @@ def dashboard():
 @login_required
 def fints_login():
     if request.method == "POST":
-        print(f"sind wohl im fint_login_post")
+        #print(f"sind wohl im fint_login_post")
         bank_identifier = request.form["bank_identifier"]
         user_id = request.form["user_id"]
         pin = request.form["pin"]
@@ -188,14 +189,58 @@ def fints_login():
             }
             email = session["email"]
             db.collection("known_users").document(email).set(user_data)
-            print("Datenbankschreiben scheint geklappt zu haben")
+            #print("Datenbankschreiben scheint geklappt zu haben")
         return render_template("dashboard.html", konto=accounts[0].iban, saldo=saldo.amount)
 
         
 
     return render_template("fints_login.html")
 
+@app.route("/transactions", methods=["POST"])
+@login_required
+def get_transactions():
+    if "email" not in session:
+        return redirect("/")
 
+    selected_days = int(request.form["days"])
+    start_date = datetime.today() - timedelta(days=selected_days)
+
+    # Authentifizierungsdaten aus Firestore abrufen (angepasst für deine DB-Struktur)
+    user_data = db.collection("knownUsers").document(session["email"]).get().to_dict()
+    if not user_data:
+        return "Keine Daten gefunden", 400
+
+    f = FinTS3PinTanClient(
+        bank_identifier=user_data["bank_identifier"],
+        user_id=user_data["user_id"],
+        pin=decrypt_pin(user_data["pin"]),
+        server=user_data["server"],
+        product_id=product_id
+    )
+
+    with f:
+        accounts = f.get_sepa_accounts()
+        if not accounts:
+            return "Keine Konten gefunden.", 400
+
+        transactions = f.get_transactions(accounts[0], start_date=start_date)
+        saldo = f.get_balance(accounts[0])
+        # Falls eine TAN erforderlich ist
+        if isinstance(transactions, NeedTANResponse):
+            return "TAN erforderlich. Implementiere eine Eingabemaske."
+
+    # Transaktionsdaten für das HTML umformatieren
+    transaction_list = []
+    for tx in transactions:
+        data = tx.data
+        transaction_list.append({
+            "date": data["date"],
+            "applicant_name": data["applicant_name"],
+            "amount": data["amount"],
+            "purpose": data["purpose"]
+        })
+
+    return render_template("dashboard.html", saldo=saldo, transactions=transaction_list, selected_days=selected_days)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
