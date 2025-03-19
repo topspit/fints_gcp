@@ -8,7 +8,7 @@
     <body>
         <h2>Kontostand</h2>
         <p>Konto: {{ konto }}</p>
-        <p>Saldo: {{ saldo }} EUR</p>
+        <p>Saldo: {{ saldo }}</p>
     </body>
 
     <!-- Buttons zur Auswahl des Umsatzzeitraums -->
@@ -27,13 +27,15 @@
                 <th>Empfänger</th>
                 <th>Betrag</th>
                 <th>Zweck</th>
+                <th>Cached</th>
             </tr>
             {% for tx in transactions %}
             <tr>
                 <td>{{ tx.date }}</td>
                 <td>{{ tx.applicant_name }}</td>
-                <td>{{ tx.amount }} €</td>
+                <td>{{ tx.amount }}</td>
                 <td>{{ tx.purpose }}</td>
+                <td>noch nicht implementiert</td>
             </tr>
             {% endfor %}
         </table>

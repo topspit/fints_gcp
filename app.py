@@ -249,7 +249,7 @@ def get_transactions():
             "purpose": data["purpose"]
         })
 
-    return render_template("dashboard.html", saldo=saldo, transactions=transaction_list, selected_days=selected_days)
+    return render_template("dashboard.html", saldo=saldo.amount, transactions=transaction_list, selected_days=selected_days)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
