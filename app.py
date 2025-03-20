@@ -13,11 +13,15 @@ from firebase_admin import credentials, firestore
 from decrypt_enc_PIN import decrypt_pin, encrypt_pin
 from google.oauth2 import service_account
 from datetime import datetime, timedelta
-#import logging
+import uuid
+
 
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)  # Geheime Session-Key
+
+# Dictionary zur Speicherung aktiver TAN-Sessions
+tan_sessions = {}
 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # Lokale HTTP-Entwicklung erlauben
 
@@ -237,9 +241,11 @@ def get_transactions():
         
         # Falls eine TAN erforderlich ist
         if isinstance(transactions, NeedTANResponse):
-            session["tan_session"] = transactions  # Speichert die TAN-Session
-            return render_template("dashboard.html", saldo=saldo.amount, selected_days=selected_days,
-                                   tan_challenge=transactions.challenge, tan_session="tan_session")
+            tan_session_id = str(uuid.uuid4())  # Eindeutige ID für die TAN-Session
+            tan_sessions[tan_session_id] = transactions  # Speichert die Session
+
+            return render_template("dashboard.html", saldo=1000.00, selected_days=selected_days,
+                                   tan_challenge=transactions.challenge, tan_session_id=tan_session_id)
 
     # Transaktionsdaten für das HTML umformatieren
     transaction_list = []
@@ -260,15 +266,23 @@ def send_tan():
     if "email" not in session:
         return redirect("/")
 
-    if "tan_session" not in session:
-        return "Fehler: Keine TAN-Session gefunden.", 400
-
     tan = request.form["tan"]
-    tan_session = session.pop("tan_session")  # Holt die gespeicherte TAN-Session
+    tan_session_id = request.form["tan_session_id"]
 
-    # TAN senden
+    # Prüfen, ob die TAN-Session existiert
+    if tan_session_id not in tan_sessions:
+        return "Fehler: TAN-Session nicht gefunden.", 400
+
+    tan_session = tan_sessions.pop(tan_session_id)  # Session abrufen und entfernen
+
+    # TAN senden und Transaktionen abrufen
     transactions = tan_session.client.send_tan(tan_session, tan)
-    # Transaktionsdaten für das HTML umformatieren
+
+    return show_transactions(transactions, request.form["days"])
+
+
+def show_transactions(transactions, selected_days):
+    """Hilfsfunktion zur Darstellung der Transaktionsliste"""
     transaction_list = []
     for tx in transactions:
         data = tx.data
@@ -279,7 +293,8 @@ def send_tan():
             "purpose": data["purpose"]
         })
 
-    selected_days = request.form["days"]
-    return render_template("dashboard.html", saldo=1000, transactions=transaction_list, selected_days=selected_days)
+    return render_template("dashboard.html", saldo=1000.00, transactions=transaction_list, selected_days=selected_days)
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
