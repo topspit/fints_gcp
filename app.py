@@ -232,11 +232,14 @@ def get_transactions():
         if not accounts:
             return "Keine Konten gefunden.", 400
 
-        transactions = f.get_transactions(accounts[0], start_date=start_date)
         saldo = f.get_balance(accounts[0])
+        transactions = f.get_transactions(accounts[0], start_date=start_date)
+        
         # Falls eine TAN erforderlich ist
         if isinstance(transactions, NeedTANResponse):
-            return "TAN erforderlich. Implementiere eine Eingabemaske."
+            session["tan_session"] = transactions  # Speichert die TAN-Session
+            return render_template("dashboard.html", saldo=saldo.amount, selected_days=selected_days,
+                                   tan_challenge=transactions.challenge, tan_session="tan_session")
 
     # Transaktionsdaten für das HTML umformatieren
     transaction_list = []
@@ -251,5 +254,32 @@ def get_transactions():
 
     return render_template("dashboard.html", saldo=saldo.amount, transactions=transaction_list, selected_days=selected_days)
 
+@app.route("/send_tan", methods=["POST"])
+@login_required
+def send_tan():
+    if "email" not in session:
+        return redirect("/")
+
+    if "tan_session" not in session:
+        return "Fehler: Keine TAN-Session gefunden.", 400
+
+    tan = request.form["tan"]
+    tan_session = session.pop("tan_session")  # Holt die gespeicherte TAN-Session
+
+    # TAN senden
+    transactions = tan_session.client.send_tan(tan_session, tan)
+    # Transaktionsdaten für das HTML umformatieren
+    transaction_list = []
+    for tx in transactions:
+        data = tx.data
+        transaction_list.append({
+            "date": data["date"],
+            "applicant_name": data["applicant_name"],
+            "amount": data["amount"],
+            "purpose": data["purpose"]
+        })
+
+    selected_days = request.form["days"]
+    return render_template("dashboard.html", saldo=1000, transactions=transaction_list, selected_days=selected_days)
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
