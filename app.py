@@ -127,14 +127,24 @@ def dashboard():
         pin = decrypt_pin(user_data["pin"])
         server = user_data["server"]
 
-        # FINTS Login durchführen
-        f = FinTS3PinTanClient(
-            bank_identifier=bank_identifier,
-            user_id=user_id,
-            pin=pin,
-            server=server,
-            product_id=product_id
-        )
+        # Falls eine laufende TAN-Session existiert, nutze den gespeicherten Client
+        existing_session = tan_sessions.get(session.get("tan_session_id"))
+        if existing_session:
+            f = existing_session["client"]
+        else:
+        # Neue FinTS-Session starten, falls keine existiert
+            f = FinTS3PinTanClient(
+                bank_identifier=bank_identifier,
+                user_id=user_id,
+                pin=pin,
+                server=server,
+                product_id=product_id
+            )
+            tan_session_id = str(uuid.uuid4())  # Eindeutige ID für die TAN-Session
+            tan_sessions[tan_session_id] = {
+                "client": f  # FinTS3PinTanClient-Objekt speichern
+            }
+        
         with f:
             # Falls eine TAN nötig ist für den Log-In
             if f.init_tan_response:
@@ -149,7 +159,7 @@ def dashboard():
             saldo = f.get_balance(accounts[0])
             
 
-        return render_template("dashboard.html", konto=accounts[0].iban, saldo=saldo.amount)
+        return render_template("dashboard.html", konto=accounts[0].iban, saldo=saldo.amount, tan_session_id=tan_session_id)
 
     else:
         print(f"email ist NICHT in mock?")
@@ -213,24 +223,11 @@ def get_transactions():
     
     user_ref = db.collection("known_users").document(email)
     user_doc = user_ref.get()
-
+    tan_session_id = request.form["tan_session_id"]
+    tan_data = tan_sessions.pop(tan_session_id)
     
-    if user_doc.exists:
-        # Falls der Nutzer existiert, die gespeicherten Daten abrufen
-        user_data = user_doc.to_dict()
-        bank_identifier = user_data["bank_identifier"]
-        user_id = user_data["user_id"]
-        pin = decrypt_pin(user_data["pin"])
-        server = user_data["server"]
-
-        # FINTS Login durchführen
-        f = FinTS3PinTanClient(
-            bank_identifier=bank_identifier,
-            user_id=user_id,
-            pin=pin,
-            server=server,
-            product_id=product_id
-        )
+    
+    f = tan_data["client"]  # FinTS3PinTanClient
 
     with f:
         # Falls eine TAN nötig ist
@@ -246,12 +243,6 @@ def get_transactions():
         
         # Falls eine TAN erforderlich ist
         if isinstance(transactions, NeedTANResponse):
-            tan_session_id = str(uuid.uuid4())  # Eindeutige ID für die TAN-Session
-            tan_sessions[tan_session_id] = {
-                "client": f,  # FinTS3PinTanClient-Objekt speichern
-                "transactions": transactions  # NeedTANResponse-Objekt speichern
-            }
-
             return render_template("dashboard.html", saldo=saldo.amount, selected_days=selected_days,
                                    tan_challenge=transactions.challenge, tan_session_id=tan_session_id)
 
@@ -289,7 +280,7 @@ def send_tan():
     f = tan_data["client"]  # FinTS3PinTanClient
     transactions = tan_data["transactions"]  # NeedTANResponse
     print(f"Typ von transactions: {type(transactions)}")
-    
+
     try:
         transactions = f.send_tan(transactions, tan)
         
