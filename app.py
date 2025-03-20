@@ -288,11 +288,11 @@ def send_tan():
     tan_data = tan_sessions.pop(tan_session_id)
     f = tan_data["client"]  # FinTS3PinTanClient
     transactions = tan_data["transactions"]  # NeedTANResponse
-
+    print(f"Typ von transactions: {type(transactions)}")
+    
     try:
-        print(f"TAN gesendet: '{tan}'")
         transactions = f.send_tan(transactions, tan)
-        print(vars(transactions))
+        
         
     except Exception as e:
         return f"Fehler beim Senden der TAN: {str(e)}", 500  
