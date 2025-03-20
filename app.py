@@ -242,7 +242,10 @@ def get_transactions():
         # Falls eine TAN erforderlich ist
         if isinstance(transactions, NeedTANResponse):
             tan_session_id = str(uuid.uuid4())  # Eindeutige ID für die TAN-Session
-            tan_sessions[tan_session_id] = transactions  # Speichert die Session
+            tan_sessions[tan_session_id] = {
+                "client": f,  # FinTS3PinTanClient-Objekt speichern
+                "tan_session": transactions  # NeedTANResponse-Objekt speichern
+            }
 
             return render_template("dashboard.html", saldo=1000.00, selected_days=selected_days,
                                    tan_challenge=transactions.challenge, tan_session_id=tan_session_id)
@@ -273,10 +276,15 @@ def send_tan():
     if tan_session_id not in tan_sessions:
         return "Fehler: TAN-Session nicht gefunden.", 400
 
-    tan_session = tan_sessions.pop(tan_session_id)  # Session abrufen und entfernen
+    #Hole den gespeicherten Client und NeedTANResponse
+    tan_data = tan_sessions.pop(tan_session_id)
+    fints_client = tan_data["client"]  # FinTS3PinTanClient
+    tan_session = tan_data["tan_session"]  # NeedTANResponse
 
-    # TAN senden und Transaktionen abrufen
-    transactions = tan_session.client.send_tan(tan_session, tan)
+    try:
+        transactions = fints_client.send_tan(tan_session, tan)
+    except Exception as e:
+        return f"Fehler beim Senden der TAN: {str(e)}", 500  
 
     return show_transactions(transactions, request.form["days"])
 
