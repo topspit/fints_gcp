@@ -238,7 +238,7 @@ def get_transactions():
         if not accounts:
             return "Keine Konten gefunden.", 400
 
-        saldo = f.get_balance(accounts[0])
+        saldo = request.form["saldo"]
         transactions = f.get_transactions(accounts[0], start_date=start_date)
         
         # Falls eine TAN erforderlich ist
