@@ -136,7 +136,7 @@ def dashboard():
             product_id=product_id
         )
         with f:
-            # Falls eine TAN nötig ist
+            # Falls eine TAN nötig ist für den Log-In
             if f.init_tan_response:
                 return render_template("tan.html", challenge=f.init_tan_response.challenge)
 

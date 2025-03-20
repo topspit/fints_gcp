@@ -24,7 +24,7 @@
     <p>{{ tan_challenge }}</p>
     <form action="/send_tan" method="post">
         <input type="hidden" name="days" value="{{ selected_days }}">
-        <input type="hidden" name="tan_session" value="{{ tan_session }}">
+        <input type="hidden" name="tan_session_id" value="{{ tan_session_id }}">
         <label for="tan">TAN eingeben:</label>
         <input type="text" name="tan" required>
         <button type="submit">TAN senden</button>
