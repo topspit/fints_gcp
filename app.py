@@ -282,11 +282,11 @@ def send_tan():
     tan_session = tan_data["tan_session"]  # NeedTANResponse
 
     try:
-        transactions = fints_client.send_tan(tan_session, tan)
+        tan_session = fints_client.send_tan(tan_session, tan)
     except Exception as e:
         return f"Fehler beim Senden der TAN: {str(e)}", 500  
 
-    return show_transactions(transactions, request.form["days"])
+    return show_transactions(tan_session, request.form["days"])
 
 
 def show_transactions(transactions, selected_days):
