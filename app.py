@@ -147,6 +147,7 @@ def dashboard():
             
             # Ersten Kontosaldo abrufen
             saldo = f.get_balance(accounts[0])
+            
 
         return render_template("dashboard.html", konto=accounts[0].iban, saldo=saldo.amount)
 
@@ -232,6 +233,10 @@ def get_transactions():
         )
 
     with f:
+        # Falls eine TAN nötig ist
+        if f.init_tan_response:
+            return render_template("tan.html", challenge=f.init_tan_response.challenge)
+
         accounts = f.get_sepa_accounts()
         if not accounts:
             return "Keine Konten gefunden.", 400
@@ -244,10 +249,10 @@ def get_transactions():
             tan_session_id = str(uuid.uuid4())  # Eindeutige ID für die TAN-Session
             tan_sessions[tan_session_id] = {
                 "client": f,  # FinTS3PinTanClient-Objekt speichern
-                "tan_session": transactions  # NeedTANResponse-Objekt speichern
+                "transactions": transactions  # NeedTANResponse-Objekt speichern
             }
 
-            return render_template("dashboard.html", saldo=1000.00, selected_days=selected_days,
+            return render_template("dashboard.html", saldo=saldo.amount, selected_days=selected_days,
                                    tan_challenge=transactions.challenge, tan_session_id=tan_session_id)
 
     # Transaktionsdaten für das HTML umformatieren
@@ -271,25 +276,31 @@ def send_tan():
 
     tan = request.form["tan"]
     tan_session_id = request.form["tan_session_id"]
+    saldo = request.form["saldo"]
 
     # Prüfen, ob die TAN-Session existiert
     if tan_session_id not in tan_sessions:
+
+        print(f"Session nicht wiedergefunden")
         return "Fehler: TAN-Session nicht gefunden.", 400
 
     #Hole den gespeicherten Client und NeedTANResponse
     tan_data = tan_sessions.pop(tan_session_id)
-    fints_client = tan_data["client"]  # FinTS3PinTanClient
-    tan_session = tan_data["tan_session"]  # NeedTANResponse
+    f = tan_data["client"]  # FinTS3PinTanClient
+    transactions = tan_data["transactions"]  # NeedTANResponse
 
     try:
-        tan_session = fints_client.send_tan(tan_session, tan)
+        print(f"TAN gesendet: '{tan}'")
+        transactions = f.send_tan(transactions, tan)
+        print(vars(transactions))
+        
     except Exception as e:
         return f"Fehler beim Senden der TAN: {str(e)}", 500  
 
-    return show_transactions(tan_session, request.form["days"])
+    return show_transactions(transactions, request.form["days"], saldo)
 
 
-def show_transactions(transactions, selected_days):
+def show_transactions(transactions, selected_days, saldo):
     """Hilfsfunktion zur Darstellung der Transaktionsliste"""
     transaction_list = []
     for tx in transactions:
@@ -301,7 +312,7 @@ def show_transactions(transactions, selected_days):
             "purpose": data["purpose"]
         })
 
-    return render_template("dashboard.html", saldo=1000.00, transactions=transaction_list, selected_days=selected_days)
+    return render_template("dashboard.html", saldo=saldo, transactions=transaction_list, selected_days=selected_days)
 
 
 if __name__ == "__main__":
