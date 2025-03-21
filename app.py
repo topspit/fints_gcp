@@ -243,7 +243,7 @@ def get_transactions():
         
         # Falls eine TAN erforderlich ist
         if isinstance(transactions, NeedTANResponse):
-            return render_template("dashboard.html", saldo=saldo.amount, selected_days=selected_days,
+            return render_template("dashboard.html", saldo=saldo, selected_days=selected_days,
                                    tan_challenge=transactions.challenge, tan_session_id=tan_session_id)
 
     # Transaktionsdaten für das HTML umformatieren
