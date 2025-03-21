@@ -257,7 +257,7 @@ def get_transactions():
             "purpose": data["purpose"]
         })
 
-    return render_template("dashboard.html", saldo=saldo.amount, transactions=transaction_list, selected_days=selected_days)
+    return render_template("dashboard.html", saldo=saldo, transactions=transaction_list, selected_days=selected_days)
 
 @app.route("/send_tan", methods=["POST"])
 @login_required
