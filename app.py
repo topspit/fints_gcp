@@ -147,8 +147,6 @@ def dashboard():
         fints_clients[fints_uuid] = f
         print(session["FINTS_client_uuid"])
 
-    # Hier kein `with f:` verwenden, da das Objekt kein Kontext-Manager ist
-
     with f: 
         if f.init_tan_response:
             return render_template("tan.html", challenge=f.init_tan_response.challenge)
@@ -280,12 +278,13 @@ def send_tan():
 
     try:
         print(session["FINTS_client_uuid"])
+        print(tan)
         transactions = f.send_tan(transactions, tan)
         
         
     except Exception as e:
         return f"Fehler beim Senden der TAN: {str(e)}", 500  
-
+    
     return show_transactions(transactions, request.form["days"], saldo)
 
 
