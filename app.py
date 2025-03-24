@@ -20,8 +20,9 @@ import uuid
 app = Flask(__name__)
 app.secret_key = os.urandom(24)  # Geheime Session-Key
 
-# Dictionary zur Speicherung aktiver TAN-Sessions
-tan_sessions = {}
+# Dictionary zur Speicherung aktiver FINTS-Sessions und transactions
+fints_clients = {}
+fints_transactions = {}
 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # Lokale HTTP-Entwicklung erlauben
 
@@ -129,41 +130,39 @@ def dashboard():
         server = user_data["server"]
 
         # Falls eine laufende TAN-Session existiert, nutze den gespeicherten Client
-        fints_client = session.get("FINTS_client")
-        if fints_client is not None:
-            f = session["FINTS_client"]
+    fints_uuid = session.get("FINTS_client_uuid")
+    f = fints_clients.get(fints_uuid) if fints_uuid else None
+
+    if f is None:
+        # Neues FinTS-Objekt erzeugen
+        f = FinTS3PinTanClient(
+            bank_identifier=bank_identifier,
+            user_id=user_id,
+            pin=pin,
+            server=server,
+            product_id=product_id
+        )
+        # UUID erzeugen und speichern
+        fints_uuid = str(uuid.uuid4())
+        session["FINTS_client_uuid"] = fints_uuid
+        fints_clients[fints_uuid] = f
+
+    # Hier kein `with f:` verwenden, da das Objekt kein Kontext-Manager ist
+
+    with f: 
+        if f.init_tan_response:
+            return render_template("tan.html", challenge=f.init_tan_response.challenge)
+
+        # Konten abrufen
+        accounts = f.get_sepa_accounts()
+        if not accounts:
+         return "Keine Konten gefunden.", 400
             
-        else:
-            # Objekt existiert nicht
-            f = FinTS3PinTanClient(
-                bank_identifier=bank_identifier,
-                user_id=user_id,
-                pin=pin,
-                server=server,
-                product_id=product_id
-            )
-            session["FINTS_client"] = f
-
-        
-        with f:
-            # Falls eine TAN nötig ist für den Log-In
-            if f.init_tan_response:
-                return render_template("tan.html", challenge=f.init_tan_response.challenge)
-
-            # Konten abrufen
-            accounts = f.get_sepa_accounts()
-            if not accounts:
-                return "Keine Konten gefunden.", 400
-            
-            # Ersten Kontosaldo abrufen
-            saldo = f.get_balance(accounts[0])
+        # Ersten Kontosaldo abrufen
+        saldo = f.get_balance(accounts[0])
             
 
-        return render_template("dashboard.html", konto=accounts[0].iban, saldo=saldo.amount)
-
-    else:
-        print(f"email ist NICHT in mock?")
-        return redirect("/fints_login")
+    return render_template("dashboard.html", konto=accounts[0].iban, saldo=saldo.amount)
 
 @app.route("/fints_login", methods=["GET", "POST"])
 @login_required
@@ -183,7 +182,10 @@ def fints_login():
             server=server,
             product_id=product_id
         )
-        session["FINTS_client"] = f
+        # UUID erzeugen und speichern
+        fints_uuid = str(uuid.uuid4())
+        session["FINTS_client_uuid"] = fints_uuid
+        fints_clients[fints_uuid] = f
         with f:
             # Falls eine TAN nötig ist
             if f.init_tan_response:
@@ -225,9 +227,9 @@ def get_transactions():
     user_ref = db.collection("known_users").document(email)
     user_doc = user_ref.get()
     
+    fints_uuid = session.get("FINTS_client_uuid")
+    f = fints_clients.get(fints_uuid)
     
-    
-    f = session["FINTS_client"]  # FinTS3PinTanClient
 
     with f:
         # Falls eine TAN nötig ist
@@ -243,7 +245,7 @@ def get_transactions():
         
         # Falls eine TAN erforderlich ist
         if isinstance(transactions, NeedTANResponse):
-            session["transactions"] = transactions
+            fints_transactions[fints_uuid] = transactions
             return render_template("dashboard.html", saldo=saldo, selected_days=selected_days,
                                    tan_challenge=transactions.challenge)
 
@@ -271,9 +273,9 @@ def send_tan():
     saldo = request.form["saldo"]
 
     #Hole den gespeicherten Client und NeedTANResponse
-    
-    f = session["FINTS_client"]  # FinTS3PinTanClient
-    transactions = session["transactions"]  # NeedTANResponse
+    fints_uuid = session.get("FINTS_client_uuid")
+    f = fints_clients.get(fints_uuid)
+    transactions = fints_transactions.get(fints_uuid)  # NeedTANResponse
 
     try:
         transactions = f.send_tan(transactions, tan)
