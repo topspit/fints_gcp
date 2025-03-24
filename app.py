@@ -22,7 +22,7 @@ app.secret_key = os.urandom(24)  # Geheime Session-Key
 
 # Dictionary zur Speicherung aktiver TAN-Sessions
 tan_sessions = {}
-session["FINTS_client"] = {}
+
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # Lokale HTTP-Entwicklung erlauben
 
 
@@ -112,6 +112,7 @@ def logout():
 @app.route("/dashboard")
 @login_required
 def dashboard():
+    session["FINTS_client"] = {}
     email = session.get("email")
     if not email:
         return redirect("/")
