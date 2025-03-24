@@ -100,7 +100,6 @@ def callback():
     session["google_id"] = id_info.get("sub")
     session["name"] = id_info.get("name")
     session["email"] = id_info.get("email") # speicherung eMail
-    print(session["email"])
     return redirect("/dashboard")
 
 @app.route("/logout")
@@ -146,6 +145,7 @@ def dashboard():
         fints_uuid = str(uuid.uuid4())
         session["FINTS_client_uuid"] = fints_uuid
         fints_clients[fints_uuid] = f
+        print(session["FINTS_client_uuid"])
 
     # Hier kein `with f:` verwenden, da das Objekt kein Kontext-Manager ist
 
@@ -229,7 +229,7 @@ def get_transactions():
     
     fints_uuid = session.get("FINTS_client_uuid")
     f = fints_clients.get(fints_uuid)
-    
+    print(session["FINTS_client_uuid"])
 
     with f:
         # Falls eine TAN nötig ist
@@ -246,6 +246,7 @@ def get_transactions():
         # Falls eine TAN erforderlich ist
         if isinstance(transactions, NeedTANResponse):
             fints_transactions[fints_uuid] = transactions
+            print(session["FINTS_client_uuid"])
             return render_template("dashboard.html", saldo=saldo, selected_days=selected_days,
                                    tan_challenge=transactions.challenge)
 
@@ -278,6 +279,7 @@ def send_tan():
     transactions = fints_transactions.get(fints_uuid)  # NeedTANResponse
 
     try:
+        print(session["FINTS_client_uuid"])
         transactions = f.send_tan(transactions, tan)
         
         
