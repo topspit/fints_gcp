@@ -231,8 +231,8 @@ def get_transactions():
 
     with f:
         # Falls eine TAN nötig ist
-        if f.init_tan_response:
-            return render_template("tan.html", challenge=f.init_tan_response.challenge)
+        #if f.init_tan_response:
+        #    return render_template("tan.html", challenge=f.init_tan_response.challenge)
 
         accounts = f.get_sepa_accounts()
         if not accounts:
@@ -246,7 +246,7 @@ def get_transactions():
             fints_transactions[fints_uuid] = transactions
             print(session["FINTS_client_uuid"])
             return render_template("dashboard.html", saldo=saldo, selected_days=selected_days,
-                                   tan_challenge=transactions.challenge)
+                                   tan_challenge="bitte tan eingeben")
 
     # Transaktionsdaten für das HTML umformatieren
     transaction_list = []
@@ -284,7 +284,7 @@ def send_tan():
         
     except Exception as e:
         return f"Fehler beim Senden der TAN: {str(e)}", 500  
-    
+
     return show_transactions(transactions, request.form["days"], saldo)
 
 
