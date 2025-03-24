@@ -183,7 +183,7 @@ def fints_login():
             server=server,
             product_id=product_id
         )
-        session["fints_client"] = f
+        session["FINTS_client"] = f
         with f:
             # Falls eine TAN nötig ist
             if f.init_tan_response:
@@ -224,11 +224,10 @@ def get_transactions():
     
     user_ref = db.collection("known_users").document(email)
     user_doc = user_ref.get()
-    tan_session_id = request.form["tan_session_id"]
-    tan_data = tan_sessions.pop(tan_session_id)
     
     
-    f = tan_data["client"]  # FinTS3PinTanClient
+    
+    f = session["FINTS_client"]  # FinTS3PinTanClient
 
     with f:
         # Falls eine TAN nötig ist
@@ -244,8 +243,9 @@ def get_transactions():
         
         # Falls eine TAN erforderlich ist
         if isinstance(transactions, NeedTANResponse):
+            session["transactions"] = transactions
             return render_template("dashboard.html", saldo=saldo, selected_days=selected_days,
-                                   tan_challenge=transactions.challenge, tan_session_id=tan_session_id)
+                                   tan_challenge=transactions.challenge)
 
     # Transaktionsdaten für das HTML umformatieren
     transaction_list = []
@@ -267,20 +267,13 @@ def send_tan():
         return redirect("/")
 
     tan = request.form["tan"]
-    tan_session_id = request.form["tan_session_id"]
+    
     saldo = request.form["saldo"]
 
-    # Prüfen, ob die TAN-Session existiert
-    if tan_session_id not in tan_sessions:
-
-        print(f"Session nicht wiedergefunden")
-        return "Fehler: TAN-Session nicht gefunden.", 400
-
     #Hole den gespeicherten Client und NeedTANResponse
-    tan_data = tan_sessions.pop(tan_session_id)
-    f = tan_data["client"]  # FinTS3PinTanClient
-    transactions = tan_data["transactions"]  # NeedTANResponse
-    print(f"Typ von transactions: {type(transactions)}")
+    
+    f = session["FINTS_client"]  # FinTS3PinTanClient
+    transactions = session["transactions"]  # NeedTANResponse
 
     try:
         transactions = f.send_tan(transactions, tan)
