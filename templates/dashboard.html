@@ -17,7 +17,6 @@
         <button type="submit" name="days" value="90">Umsätze 90 Tage</button>
         <button type="submit" name="days" value="180">Umsätze 180 Tage</button>
         <input type="hidden" name="saldo" value="{{ saldo }}">
-        <input type="hidden" name="tan_session_id" value="{{ tan_session_id }}">
     </form>
 
     <!-- TAN-Eingabemaske -->
@@ -26,7 +25,6 @@
     <p>{{ tan_challenge }}</p>
     <form action="/send_tan" method="post">
         <input type="hidden" name="days" value="{{ selected_days }}">
-        <input type="hidden" name="tan_session_id" value="{{ tan_session_id }}">
         <input type="hidden" name="saldo" value="{{ saldo }}">
         <label for="tan">TAN eingeben:</label>
         <input type="text" name="tan" required>

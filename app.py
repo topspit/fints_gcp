@@ -22,7 +22,7 @@ app.secret_key = os.urandom(24)  # Geheime Session-Key
 
 # Dictionary zur Speicherung aktiver TAN-Sessions
 tan_sessions = {}
-
+session["FINTS_client"] = {}
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # Lokale HTTP-Entwicklung erlauben
 
 
@@ -128,11 +128,12 @@ def dashboard():
         server = user_data["server"]
 
         # Falls eine laufende TAN-Session existiert, nutze den gespeicherten Client
-        existing_session = tan_sessions.get(session.get("tan_session_id"))
-        if existing_session:
-            f = existing_session["client"]
+        fints_client = session.get("FINTS_client")
+        if fints_client is not None:
+            f = session["FINTS_client"]
+            
         else:
-        # Neue FinTS-Session starten, falls keine existiert
+            # Objekt existiert nicht
             f = FinTS3PinTanClient(
                 bank_identifier=bank_identifier,
                 user_id=user_id,
@@ -140,10 +141,8 @@ def dashboard():
                 server=server,
                 product_id=product_id
             )
-            tan_session_id = str(uuid.uuid4())  # Eindeutige ID für die TAN-Session
-            tan_sessions[tan_session_id] = {
-                "client": f  # FinTS3PinTanClient-Objekt speichern
-            }
+            session["FINTS_client"] = f
+
         
         with f:
             # Falls eine TAN nötig ist für den Log-In
@@ -159,7 +158,7 @@ def dashboard():
             saldo = f.get_balance(accounts[0])
             
 
-        return render_template("dashboard.html", konto=accounts[0].iban, saldo=saldo.amount, tan_session_id=tan_session_id)
+        return render_template("dashboard.html", konto=accounts[0].iban, saldo=saldo.amount)
 
     else:
         print(f"email ist NICHT in mock?")
@@ -183,6 +182,7 @@ def fints_login():
             server=server,
             product_id=product_id
         )
+        session["fints_client"] = f
         with f:
             # Falls eine TAN nötig ist
             if f.init_tan_response:
