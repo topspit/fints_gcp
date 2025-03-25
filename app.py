@@ -23,6 +23,7 @@ app.secret_key = os.urandom(24)  # Geheime Session-Key
 # Dictionary zur Speicherung aktiver FINTS-Sessions und transactions
 fints_clients = {}
 fints_transactions = {}
+tan_data = {}
 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # Lokale HTTP-Entwicklung erlauben
 
@@ -149,7 +150,7 @@ def dashboard():
 
     with f: 
         if f.init_tan_response:
-            return render_template("tan.html", challenge=f.init_tan_response.challenge)
+            return "TAN Verfahren noch nicht unterstützt", 400
 
         # Konten abrufen
         accounts = f.get_sepa_accounts()
@@ -243,10 +244,13 @@ def get_transactions():
         
         # Falls eine TAN erforderlich ist
         if isinstance(transactions, NeedTANResponse):
-            fints_transactions[fints_uuid] = transactions
-            print(session["FINTS_client_uuid"])
-            return render_template("dashboard.html", saldo=saldo, selected_days=selected_days,
-                                   tan_challenge="bitte tan eingeben")
+            return "TAN Verfahren noch nicht unterstützt", 400
+            #fints_transactions[fints_uuid] = transactions
+            #fints_clients[fints_uuid] = f.deconstruct()
+            #print(session["FINTS_client_uuid"])
+            #tan_data[fints_uuid]  = transactions.get_data()
+            #return render_template("dashboard.html", saldo=saldo, selected_days=selected_days,
+                                  # tan_challenge="bitte tan eingeben")
 
     # Transaktionsdaten für das HTML umformatieren
     transaction_list = []
@@ -261,6 +265,8 @@ def get_transactions():
 
     return render_template("dashboard.html", saldo=saldo, transactions=transaction_list, selected_days=selected_days)
 
+
+# toter Code
 @app.route("/send_tan", methods=["POST"])
 @login_required
 def send_tan():
