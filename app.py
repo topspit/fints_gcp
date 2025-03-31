@@ -25,7 +25,7 @@ fints_clients = {}
 fints_transactions = {}
 tan_data = {}
 
-os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # Lokale HTTP-Entwicklung erlauben
+# os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # Lokale HTTP-Entwicklung erlauben
 
 
 
