@@ -19,13 +19,14 @@ import uuid
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)  # Geheime Session-Key
+app.config["PREFERRED_URL_SCHEME"] = "https"
 
 # Dictionary zur Speicherung aktiver FINTS-Sessions und transactions
 fints_clients = {}
 fints_transactions = {}
 tan_data = {}
 
-os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # Lokale HTTP-Entwicklung erlauben
+# os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # Lokale HTTP-Entwicklung erlauben
 
 
 
@@ -77,6 +78,7 @@ def login():
 
 @app.route("/login/callback")
 def callback():
+    print(f"Callback aufgerufen mit URL: {request.url}")
     state_from_session = session.get("state")  # Sicher abrufen, ohne KeyError
     state_from_request = request.args.get("state")
 
@@ -85,7 +87,10 @@ def callback():
         return redirect("/logout")  # Oder eine Fehlermeldung anzeigen
 
     # Wenn der State stimmt, OAuth-Flow fortsetzen...
-    flow.fetch_token(authorization_response=request.url)
+    #aus http -> https machen:
+    https_authorization_url = request.url.replace('http://', 'https://')
+    flow.fetch_token(authorization_response=https_authorization_url)
+    #flow.fetch_token(authorization_response=request.url)
 
     credentials = flow.credentials
     request_session = requests.session()
