@@ -87,7 +87,10 @@ def callback():
         return redirect("/logout")  # Oder eine Fehlermeldung anzeigen
 
     # Wenn der State stimmt, OAuth-Flow fortsetzen...
-    flow.fetch_token(authorization_response=request.url)
+    #aus http -> https machen:
+    https_authorization_url = request.url.replace('http://', 'https://')
+    flow.fetch_token(authorization_response=https_authorization_url)
+    #flow.fetch_token(authorization_response=request.url)
 
     credentials = flow.credentials
     request_session = requests.session()
