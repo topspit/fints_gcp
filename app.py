@@ -19,6 +19,7 @@ import uuid
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)  # Geheime Session-Key
+app.config["PREFERRED_URL_SCHEME"] = "https"
 
 # Dictionary zur Speicherung aktiver FINTS-Sessions und transactions
 fints_clients = {}
@@ -77,6 +78,7 @@ def login():
 
 @app.route("/login/callback")
 def callback():
+    print(f"Callback aufgerufen mit URL: {request.url}")
     state_from_session = session.get("state")  # Sicher abrufen, ohne KeyError
     state_from_request = request.args.get("state")
 
