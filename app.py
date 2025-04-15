@@ -102,7 +102,7 @@ def callback():
         request=token_request,
         audience=flow.client_config["client_id"]
     )
-
+    # Speicherung Sessiondaten
     session["google_id"] = id_info.get("sub")
     session["name"] = id_info.get("name")
     session["email"] = id_info.get("email") # speicherung eMail
