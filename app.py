@@ -133,8 +133,10 @@ def dashboard():
         user_id = user_data["user_id"]
         pin = decrypt_pin(user_data["pin"])
         server = user_data["server"]
+    else:
+        return redirect("/fints_login")
 
-        # Falls eine laufende TAN-Session existiert, nutze den gespeicherten Client
+     # Falls eine laufende TAN-Session existiert, nutze den gespeicherten Client
     fints_uuid = session.get("FINTS_client_uuid")
     f = fints_clients.get(fints_uuid) if fints_uuid else None
 
