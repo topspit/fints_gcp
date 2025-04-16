@@ -42,6 +42,7 @@ firebase_admin.initialize_app(cred)
 
 # Firestore-Client erstellen
 db = firestore.client()
+#gtest
 
 #FINTSClient-Product-ID
 product_id = "36792786FA12F235F04647689"
